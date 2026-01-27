@@ -1,0 +1,78 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=your_provider
+      - VPN_TYPE=openvpn
+      - OPENVPN_USER=your_user
+      - OPENVPN_PASSWORD=your_password
+      - SERVER_REGIONS=your_region
+      # Gluetun HTTP control server with auth
+      - HTTP_CONTROL_SERVER_ADDRESS=:8000
+      - HTTP_CONTROL_SERVER_LOG=on
+      # Generate a secure API key: openssl rand -base64 32
+      - CONTROL_SERVER_API_KEY=your_gluetun_api_key_here
+    ports:
+      - "8000:8000"  # Gluetun control server
+    restart: unless-stopped
+
+  slskd:
+    image: slskd/slskd:latest
+    container_name: slskd
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      # CRITICAL: Enable remote configuration
+      - SLSKD_REMOTE_CONFIGURATION=true
+      - SLSKD_SLSK_USERNAME=your_soulseek_username
+      - SLSKD_SLSK_PASSWORD=your_soulseek_password
+      # Generate API key with: openssl rand -base64 32
+      # This key must have Administrator role in slskd's YAML config
+      - SLSKD_WEB_AUTHENTICATION_API_KEYS_YOUR_KEY_NAME=your_slskd_api_key_here
+      - SLSKD_WEB_AUTHENTICATION_API_KEYS_YOUR_KEY_NAME_ROLE=Administrator
+    volumes:
+      - ./slskd:/app
+      - ./downloads:/var/slskd/downloads
+      - ./incomplete:/var/slskd/incomplete
+    restart: unless-stopped
+
+  slsksticky:
+    build: .
+    container_name: slsksticky
+    depends_on:
+      - gluetun
+      - slskd
+    environment:
+      # Gluetun settings
+      - GLUETUN_HOST=gluetun
+      - GLUETUN_PORT=8000
+      - GLUETUN_AUTH_TYPE=apikey
+      - GLUETUN_APIKEY=your_gluetun_api_key_here
+
+      # slskd settings
+      - SLSKD_HOST=gluetun  # slskd uses gluetun's network
+      - SLSKD_PORT=5030
+      - SLSKD_APIKEY=your_slskd_api_key_here
+      - SLSKD_HTTPS=false
+      - SLSKD_VERIFY_SSL=false
+
+      # Optional settings
+      - CHECK_INTERVAL=30
+      - LOG_LEVEL=INFO
+      - HEALTH_FILE=/app/health/status.json
+    volumes:
+      - slsksticky-health:/app/health
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/health/status.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  slsksticky-health:
