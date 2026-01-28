@@ -235,9 +235,11 @@ class SlskdClient:
     async def reconnect_server(self) -> bool:
         """Trigger slskd to reconnect to the Soulseek network."""
         try:
+            headers = self._get_headers()
+            headers["Content-Type"] = "application/json"
             async with self.session.put(
                 f"{self.base_url}/api/v0/server",
-                headers=self._get_headers()
+                headers=headers
             ) as response:
                 if response.status in (200, 205):
                     self.logger.debug("Successfully triggered server reconnect")
