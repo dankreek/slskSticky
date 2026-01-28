@@ -263,7 +263,7 @@ class SlskdClient:
 
             # Parse and update the YAML
             config = yaml.safe_load(yaml_content)
-            if config is None:
+            if not isinstance(config, dict):
                 config = {}
 
             # Ensure soulseek section exists
