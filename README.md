@@ -87,13 +87,7 @@ environment:
 
 ## Quick Start
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/dankreek/slskSticky.git
-   cd slskSticky
-   ```
-
-2. Generate secure API keys:
+1. Generate secure API keys:
    ```bash
    # For Gluetun
    openssl rand -base64 32
@@ -102,25 +96,25 @@ environment:
    openssl rand -base64 32
    ```
 
-3. Edit `docker-compose.yml` and update the following:
+2. Create a `docker-compose.yml` file using the example below, updating:
    - Gluetun VPN provider settings (`VPN_SERVICE_PROVIDER`, `OPENVPN_USER`, `OPENVPN_PASSWORD`, `SERVER_REGIONS`)
-   - `CONTROL_SERVER_API_KEY` (Gluetun) - use the API key from step 2
-   - `SLSKD_WEB_AUTHENTICATION_API_KEYS_*` (slskd) - use the API key from step 2
+   - `CONTROL_SERVER_API_KEY` (Gluetun) - use the API key from step 1
+   - `SLSKD_WEB_AUTHENTICATION_API_KEYS_*` (slskd) - use the API key from step 1
    - `SLSKD_SLSK_USERNAME` and `SLSKD_SLSK_PASSWORD` - your Soulseek credentials
    - Volume paths (adjust paths for your downloads and incomplete directories)
    - `GLUETUN_APIKEY` and `SLSKD_APIKEY` in slskSticky service
 
-4. Start the stack:
+3. Start the stack:
    ```bash
    docker compose up -d
    ```
 
-5. Check logs:
+4. Check logs:
    ```bash
    docker compose logs -f slsksticky
    ```
 
-6. Verify the setup (see Verification section below)
+5. Verify the setup (see Verification section below)
 
 ## Complete Docker Compose Example
 
@@ -167,7 +161,7 @@ services:
     restart: unless-stopped
 
   slsksticky:
-    build: .
+    image: ghcr.io/dankreek/slsksticky:latest
     container_name: slsksticky
     depends_on:
       - gluetun
@@ -200,6 +194,12 @@ volumes:
 - Because of this, slskSticky must connect to slskd via `SLSKD_HOST=gluetun`
 - slskd's web UI is accessible through Gluetun's ports (add `5030:5030` to Gluetun)
 - Both API keys must match between services (Gluetun ↔ slskSticky and slskd ↔ slskSticky)
+
+**Image Tags:**
+- `ghcr.io/dankreek/slsksticky:latest` - Latest stable release
+- `ghcr.io/dankreek/slsksticky:0.1.0` - Pin to specific version (recommended for production)
+- `ghcr.io/dankreek/slsksticky:0.1` - Pin to minor version
+- `ghcr.io/dankreek/slsksticky:0` - Pin to major version
 
 ## Configuration
 
@@ -281,6 +281,23 @@ docker ps --filter name=slsksticky --format "table {{.Names}}\t{{.Status}}"
 
 ## Development
 
+### Building from Source
+
+If you want to build from source instead of using the published image:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/dankreek/slskSticky.git
+   cd slskSticky
+   ```
+
+2. Build the Docker image:
+   ```bash
+   docker build -t slsksticky .
+   ```
+
+3. Update your `docker-compose.yml` to use `build: .` instead of the `image:` directive.
+
 ### Local Setup
 
 1. Install dependencies:
@@ -290,14 +307,8 @@ docker ps --filter name=slsksticky --format "table {{.Names}}\t{{.Status}}"
 
 2. Run locally:
    ```bash
-   uv run python src/slsksticky.py
+   uv run python slsksticky.py
    ```
-
-### Building Docker Image
-
-```bash
-docker build -t slsksticky .
-```
 
 ## How It Works
 
