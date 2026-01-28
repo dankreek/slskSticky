@@ -8,7 +8,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 
 # Copy project files
-COPY pyproject.toml README.md slsksticky.py ./
+COPY pyproject.toml uv.lock README.md slsksticky.py ./
 
 # Install dependencies and build
 RUN uv sync --frozen --no-dev
