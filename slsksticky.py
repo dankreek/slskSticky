@@ -270,8 +270,13 @@ class SlskdClient:
             if "soulseek" not in config:
                 config["soulseek"] = {}
 
-            # Get current port for logging
-            old_port = config.get("soulseek", {}).get("listen_port")
+            # Get current port
+            current_port = config.get("soulseek", {}).get("listen_port")
+
+            # Check if port is already set correctly
+            if current_port == new_port:
+                self.logger.debug(f"Port {new_port} already configured in slskd, skipping update")
+                return True
 
             # Update the port
             config["soulseek"]["listen_port"] = new_port
@@ -283,7 +288,7 @@ class SlskdClient:
             if not await self.update_yaml_config(updated_yaml):
                 return False
 
-            self.logger.info(f"Updated listen port: {old_port} -> {new_port}")
+            self.logger.info(f"Updated listen port: {current_port} -> {new_port}")
 
             # Trigger reconnect
             if not await self.reconnect_server():
