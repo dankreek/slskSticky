@@ -194,7 +194,7 @@ class SlskdClient:
                 headers=self._get_headers()
             ) as response:
                 if response.status == 200:
-                    yaml_content = await response.text()
+                    yaml_content = await response.json()
                     self.logger.debug("Successfully retrieved YAML config")
                     return yaml_content
                 elif response.status == 403:
