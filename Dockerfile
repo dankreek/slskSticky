@@ -8,8 +8,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 
 # Copy project files
-COPY pyproject.toml README.md ./
-COPY src/ ./src/
+COPY pyproject.toml README.md slsksticky.py ./
 
 # Install dependencies and build
 RUN uv sync --frozen --no-dev
@@ -24,7 +23,7 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 
 # Copy source code
-COPY --from=builder /app/src /app/src
+COPY --from=builder /app/slsksticky.py /app/slsksticky.py
 
 # Create health directory
 RUN mkdir -p /app/health
@@ -38,4 +37,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD test -f /app/health/status.json && [ "$(cat /app/health/status.json | python3 -c 'import sys, json; print(json.load(sys.stdin).get(\"healthy\", False))')" = "True" ] || exit 1
 
 # Run the application
-CMD ["python", "src/slsksticky.py"]
+CMD ["python", "slsksticky.py"]

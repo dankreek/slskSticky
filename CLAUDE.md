@@ -2,10 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Important: Always Use `uv`
+
+**All Python commands in this repository MUST be run with `uv run` prefix.**
+- Never use bare `python` or `python3` commands
+- Always use `uv run python` for executing Python scripts
+- This ensures correct dependency resolution and environment isolation
+
 ## Build & Run Commands
 
 - `uv sync` - Install dependencies
-- `uv run python src/slsksticky.py` - Run the service locally
+- `uv run python slsksticky.py` - Run the service locally
 - `docker build -t slsksticky .` - Build Docker image
 - `docker compose up` - Run full stack
 
@@ -24,7 +31,7 @@ Key classes:
 
 ## Dependencies
 
-Uses `uv` for project management. All commands should use `uv run` prefix.
+This project uses `uv` for dependency management and virtual environment handling. Dependencies are defined in `pyproject.toml` and locked in `uv.lock`.
 
 ## Reference Implementations
 
