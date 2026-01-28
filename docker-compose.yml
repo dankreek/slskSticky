@@ -4,19 +4,19 @@ services:
     container_name: gluetun
     cap_add:
       - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - "5030:5030"  # Gluetun control server
+    volumes:
+      - ./gluetun/config.toml:/gluetun/auth/config.toml
     environment:
       - VPN_SERVICE_PROVIDER=your_provider
       - VPN_TYPE=openvpn
       - OPENVPN_USER=your_user
       - OPENVPN_PASSWORD=your_password
       - SERVER_REGIONS=your_region
-      # Gluetun HTTP control server with auth
-      - HTTP_CONTROL_SERVER_ADDRESS=:8000
-      - HTTP_CONTROL_SERVER_LOG=on
-      # Generate a secure API key: openssl rand -base64 32
-      - CONTROL_SERVER_API_KEY=your_gluetun_api_key_here
-    ports:
-      - "8000:8000"  # Gluetun control server
+      - GLUETUN_HTTP_CONTROL_SERVER_ENABLE=on
     restart: unless-stopped
 
   slskd:
@@ -28,8 +28,6 @@ services:
     environment:
       # CRITICAL: Enable remote configuration
       - SLSKD_REMOTE_CONFIGURATION=true
-      - SLSKD_SLSK_USERNAME=your_soulseek_username
-      - SLSKD_SLSK_PASSWORD=your_soulseek_password
       # Generate API key with: openssl rand -base64 32
       # This key must have Administrator role in slskd's YAML config
       - SLSKD_WEB_AUTHENTICATION_API_KEYS_YOUR_KEY_NAME=your_slskd_api_key_here
